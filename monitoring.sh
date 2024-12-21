@@ -1,5 +1,4 @@
 #!/bin/bash
-
 BANNER="
 	   (                   )   )                       )
 	 ( )\      (        ( /(( /(    (  (            ( /(
@@ -52,8 +51,9 @@ MAC_ADDRESS=$(ip link | grep "ether" | awk '{print $2}')
 # Sudo komut sayısı
 SUDO_COMMANDS_COUNT=$(cat /var/log/sudo/sudo.log | grep "COMMAND" | wc -l)
 
+
 # Her şeyin yazdırılması
-wall -n "
+wall "
 $BANNER
 	#Architecture	:	$ARCHITECTURE
 	#CPU physical	:	$PHYSICAL_CPU_NB
@@ -67,4 +67,5 @@ $BANNER
 	#User log	:	$CONNECTED_USERS
 	#Network	:	$IP_ADDRESS ($MAC_ADDRESS)
 	#Sudo		:	$SUDO_COMMANDS_COUNT cmd"
+
 
