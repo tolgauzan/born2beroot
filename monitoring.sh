@@ -9,51 +9,62 @@ BANNER="
 	 | _ \/ _ \ '_| ' \)) /| '_ \/ -_)| '_/ _ \/ _ \  _|
 	 |___/\___/_| |_||_/___|_.__/\___||_| \___/\___/\__|
 "
+#İşletim sistemi mimarisi kernel versiyon 
+ARCHITECTURE=$(uname -a | sed 's/ PREEMPT_DYNAMIC//')
 
-ARCHITECTURE=$(uname -a)
-
+#Fiziksel cpu
 PHYSICAL_CPU_NB=$(lscpu | grep "CPU(s)" | awk '{print $2}' | head -n 1)
 
+#Sanal Cpu
 VIRTUAL_CPU_NB=$(nproc)
 
-RAM_USED=$(free -m | grep Mem | awk '{print $3}')
-RAM_TOTAL=$(free -m | grep Mem | awk '{print $2}')
-RAM_PERCENT=$(free -m | grep Mem | awk '{printf("%.2f", $3/$2 * 100)}')
-RAM_USAGE="$RAM_USED/${RAM_TOTAL}MB ($RAM_PERCENT%)"
+# RAM kullanım durumu
+MEMORY_INFO=$(free -m | grep Mem)
+TOTAL_RAM=$(echo $MEMORY_INFO | awk '{print $2}') # Toplam RAM
+USED_RAM=$(echo $MEMORY_INFO | awk '{print $3}') # Kullanılan RAM
+RAM_USAGE=$(echo "scale=2; $USED_RAM/$TOTAL_RAM*100" | bc)
 
-DISK_USED=$(df -Bm | grep "^/dev/" | grep -v "/boot$" | awk '{USED += $3} END {print USED}')
-DISK_TOTAL=$(df -Bg | grep "^/dev/" | grep -v "/boot$" | awk '{FREE += $2} END {print FREE}')
-DISK_PERCENT=$(awk "BEGIN {printf \"%.2f\", ($DISK_USED / ($DISK_TOTAL * 1024)) * 100}")
-DISK_USAGE="${DISK_USED}MB/${DISK_TOTAL}GB ($DISK_PERCENT%)"
+# Disk kullanım durumu
+DISK_INFO=$(df -h | grep '^/dev')
+DISK_TOTAL=$(echo $DISK_INFO | awk '{print $2}')
+DISK_USED=$(echo $DISK_INFO | awk '{print $3}')
+DISK_USAGE=$(echo $DISK_INFO | awk '{print $5}')
 
-CPU_LOAD="$(top -bn1 | grep "%Cpu(s)" | cut -c 11- | awk '{printf("%.1f", $1 + $3)}')%"
+# CPU yük durumu
+CPU_LOAD=$(cat /proc/loadavg | awk '{print $1}')
 
-LAST_BOOT=$(who -b | awk '{printf("%s %s", $3, $4)}')
+# Son yeniden başlatma zamanı
+LAST_BOOT=$(who -b | awk '{print $3, $4}')
 
-LVM_USE=$(if [ $(lsblk | grep "lvm" | wc -l) -eq 0 ]; then echo "no"; else echo "yes"; fi)
+# LVM kullanım durumu
+LVM_STATUS=$(if [ $(lsblk | grep "lvm" | wc -l) -eq 0 ]; then echo no; else echo yes; fi)
 
-TCP_CONNECTIONS=$(cat /proc/net/sockstat | grep "TCP:" | awk '{print $3}')
+# Aktif bağlantı sayısı
+TCP_CONNECTIONS=$(netstat -an | grep ESTABLISHED | wc -l)
 
+# Sunucuyu kullanan kullanıcı sayısı
 CONNECTED_USERS=$(who | wc -l)
 
+# IPv4 ve MAC adresi
 IP_ADDRESS=$(hostname -I | awk '{print $1}')
 MAC_ADDRESS=$(ip link | grep "ether" | awk '{print $2}')
-NETWORK="IP: ${IP_ADDRESS} | MAC: ${MAC_ADDRESS}"
 
-SUDO_COMMANDS=$(cat /var/log/sudo/sudo.log | grep "COMMAND" | wc -l)
+# Sudo komut sayısı
+SUDO_COMMANDS_COUNT=$(cat /var/log/sudo/sudo.log | grep "COMMAND" | wc -l)
 
+# Her şeyin yazdırılması
 wall -n "
 $BANNER
-				$(whoami)@$(hostname)
-	#Architecture:		$ARCHITECTURE
-	#Physical CPU:		$PHYSICAL_CPU_NB
-	#Virtual CPU:		$VIRTUAL_CPU_NB
-	#Memory Usage:		$RAM_USAGE
-	#Disk Usage:		$DISK_USAGE
-	#CPU Load:		$CPU_LOAD
-	#Last Boot:		$LAST_BOOT
-	#LVM Use:		$LVM_USE
-	#TCP Connections:	$TCP_CONNECTIONS ESTABLISHED
-	#Users:			$CONNECTED_USERS
-	#Network:		$NETWORK
-	#Sudo:			$SUDO_COMMANDS COMMANDS RAN"
+	#Architecture	:	$ARCHITECTURE
+	#CPU physical	:	$PHYSICAL_CPU_NB
+	#vCPU		:	$VIRTUAL_CPU_NB
+	#Memory Usage	:	$USED_RAM/$TOTAL_RAM ($RAM_USAGE%)
+	#Disk Usage	:	$DISK_USED/$DISK_TOTAL ($DISK_USAGE)
+	#CPU load	:	$CPU_LOAD
+	#Last boot	:	$LAST_BOOT
+	#LVM use	:	$LVM_STATUS
+	#Connections TCP:	$TCP_CONNECTIONS ESTABLISHED
+	#User log	:	$CONNECTED_USERS
+	#Network	:	$IP_ADDRESS ($MAC_ADDRESS)
+	#Sudo		:	$SUDO_COMMANDS_COUNT cmd"
+
