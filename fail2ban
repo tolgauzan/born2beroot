@@ -1,0 +1,38 @@
+Fail2ban'ı yükleme
+İkinci bonus için, kaba kuvvet saldırılarına karşı SSH için bir güvenlik önlemi olarak Fail2ban'ı kurmayı seçtim.
+
+Fail2ban'ı yükleyin:
+
+$ sudo apt install fail2ban
+$ sudo systemctl start fail2ban
+$ sudo systemctl enable fail2ban
+
+$ sudo systemctl status fail2ban
+Yerel yapılandırma dosyası oluşturun./etc/fail2ban/jail.local
+
+$ sudo cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
+Düzenleyin, "SSH sunucuları" başlığının ~279 satırını bulun ve [sshd] yapılandırmalarını şu şekilde değiştirin:/etc/fail2ban/jail.local
+
+[sshd]
+
+# To use more aggressive sshd modes set filter parameter "mode" in jail.local:
+# normal (default), ddos, extra or aggressive (combines all).
+# See "tests/files/logs/sshd" or "filter.d/sshd.conf" for usage example and details.
+# mode   = normal
+enabled  = true
+maxretry = 3
+findtime = 10m
+bantime  = 1d
+port     = 4242
+logpath  = %(sshd_log)s
+backend  = %(sshd_backend)s
+Fail2ban'ı yeniden başlatın:
+
+$ sudo systemctl restart fail2ban
+Başarısız bağlantı girişimlerini ve yasaklanmış IP adreslerini kontrol etmek için şu komutları kullanın:
+
+$ sudo fail2ban-client status
+$ sudo fail2ban-client status sshd
+$ sudo tail -f /var/log/fail2ban.log
+Sshd ayarlarında düşük bir değer (10m gibi) ayarlayarak test edin ve yasaklanmak için yanlış şifre ile SSH üzerinden birden çok kez bağlanmayı deneyin.bantime/etc/fail2ban/jail.local
+
