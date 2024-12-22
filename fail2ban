@@ -22,17 +22,20 @@ Düzenleyin, "SSH sunucuları" başlığının ~279 satırını bulun ve [sshd] 
 enabled  = true
 maxretry = 3
 findtime = 10m
-bantime  = 1d
+bantime  = 1m
 port     = 4242
-logpath  = %(sshd_log)s
-backend  = %(sshd_backend)s
+logpath  = /var/log/auth.log
+backend  = systemd
+
 Fail2ban'ı yeniden başlatın:
 
 $ sudo systemctl restart fail2ban
+
 Başarısız bağlantı girişimlerini ve yasaklanmış IP adreslerini kontrol etmek için şu komutları kullanın:
 
 $ sudo fail2ban-client status
 $ sudo fail2ban-client status sshd
 $ sudo tail -f /var/log/fail2ban.log
+sudo fail2ban-client set <jail_adı> unbanip <ip_adresi>    banlanan ipyi kaldırmak için
 Sshd ayarlarında düşük bir değer (10m gibi) ayarlayarak test edin ve yasaklanmak için yanlış şifre ile SSH üzerinden birden çok kez bağlanmayı deneyin.bantime/etc/fail2ban/jail.local
 
