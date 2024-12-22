@@ -24,9 +24,9 @@ maxretry = 3
 findtime = 10m
 bantime  = 1m
 port     = 4242
-logpath  = /var/log/auth.log
-backend  = systemd
-
+logpath  = /var/log/auth.log                    logpath = %(sshd_log)s
+backend  = systemd                              backend = %(sshd_backend)s
+ 
 Fail2ban'ı yeniden başlatın:
 
 $ sudo systemctl restart fail2ban
