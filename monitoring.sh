@@ -19,10 +19,9 @@ PHYSICAL_CPU_NB=$(lscpu | grep "CPU(s)" | awk '{print $2}' | head -n 1)
 VIRTUAL_CPU_NB=$(nproc)
 
 # RAM kullanım durumu
-MEMORY_INFO=$(free -m | grep Mem)
-TOTAL_RAM=$(echo $MEMORY_INFO | awk '{print $2}') # Toplam RAM
-USED_RAM=$(echo $MEMORY_INFO | awk '{print $3}') # Kullanılan RAM
-RAM_USAGE=$(echo "scale=2; $USED_RAM/$TOTAL_RAM*100" | bc)
+TOTAL_RAM=$(free -m | awk 'NR==2 {print $2}')
+USED_RAM=$(free -m | awk 'NR==2 {print $3}')
+RAM_USAGE=$(awk "BEGIN {print ($USED_RAM/$TOTAL_RAM)*100}")
 
 # Disk kullanım durumu
 DISK_INFO=$(df -h | grep '^/dev')
