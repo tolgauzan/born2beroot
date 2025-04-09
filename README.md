@@ -10,9 +10,6 @@
 Born2beRoot, 42 çekirdek müfredatından bir Sistem Yönetimi alıştırmasıdır. Yapılması gereken VirtualBox kullanarak katı kurallara uygun bir makine oluşturmaktır.
 Bu anlatım Debian için projenin bonus ile kurulum talimatlarını içermektedir.
 
-**Grade** : ?/100 \
-**Subjects v3.2** : [`TR`](docs/tr.subject.pdf)
-
 ---
 ## 1- Sanal Makine (Virtual Machine)💿
 
